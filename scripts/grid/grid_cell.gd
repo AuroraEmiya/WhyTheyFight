@@ -15,12 +15,32 @@ extends Resource
 # ──────────────────────────────────────────
 # 地形枚举
 # ──────────────────────────────────────────
+#
+# 当前 GridCell.Terrain 与 MapData.TerrainType 的映射关系：
+#
+#   GridCell.Terrain    MapData.TerrainType    说明
+#   ─────────────────   ────────────────────   ──────────────────────────
+#   PLAIN   (0)    →    ROAD        (0)        默认可通行地形，移动消耗 1.0
+#   FOREST  (1)    →    ROAD        (0)        扩展地形：可通行，掩体，消耗 1.5
+#   MOUNTAIN(2)    →    ROAD        (0)        扩展地形：可通行，高地，消耗 2.0
+#   WATER   (3)    →    WATER       (1)        不可通行（can_swim 单位除外）
+#   WALL    (4)    →    OBSTACLE    (2)        不可通行
+#
+# FOREST / MOUNTAIN 是 GridCell 遗留系统中的扩展地形类型，
+# 在 MapData 分层系统中暂无直接对应项。其通行判断等价于 ROAD +
+# 额外移动消耗与属性（掩体/高地），后续若需要可在 MapData 中补充。
+#
+# 通行判断统一入口：
+#   - 新代码：MovementRule.can_unit_enter() + MapData（分层，推荐）
+#   - 旧代码：GridManager.is_cell_walkable() + GridCell（遗留，向后兼容）
+#   - 桥接方法：GridCell.get_basic_terrain_type() → MapData.TerrainType 整数值
+#
 enum Terrain {
-	PLAIN = 0,    # 平原 — 移动消耗 1.0
-	FOREST = 1,   # 森林 — 移动消耗 1.5，提供掩体
-	MOUNTAIN = 2, # 山地 — 移动消耗 2.0，远程单位射程+1
-	WATER = 3,    # 水域 — 地面单位不可通行
-	WALL = 4,     # 墙壁 — 不可通行
+	PLAIN = 0,    # 平原 — 对应 MapData.TerrainType.ROAD
+	FOREST = 1,   # 森林 — 对应 MapData.TerrainType.ROAD（扩展：掩体，消耗 1.5）
+	MOUNTAIN = 2, # 山地 — 对应 MapData.TerrainType.ROAD（扩展：高地，消耗 2.0）
+	WATER = 3,    # 水域 — 对应 MapData.TerrainType.WATER
+	WALL = 4,     # 墙壁 — 对应 MapData.TerrainType.OBSTACLE
 }
 
 
@@ -75,6 +95,20 @@ func provides_cover() -> bool:
 ## 该格子是否为高地（远程优势）
 func is_high_ground() -> bool:
 	return terrain == Terrain.MOUNTAIN
+
+
+## 获取该地形对应的基础地形类型（兼容 MapData.TerrainType）
+## @return int: 0=ROAD, 1=WATER, 2=OBSTACLE
+func get_basic_terrain_type() -> int:
+	match terrain:
+		Terrain.PLAIN, Terrain.FOREST, Terrain.MOUNTAIN:
+			return 0   # MapData.TerrainType.ROAD
+		Terrain.WATER:
+			return 1   # MapData.TerrainType.WATER
+		Terrain.WALL:
+			return 2   # MapData.TerrainType.OBSTACLE
+		_:
+			return 0   # 默认视为 ROAD
 
 
 # ──────────────────────────────────────────

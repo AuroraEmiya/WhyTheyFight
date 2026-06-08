@@ -1,3 +1,10 @@
 # Godot 4+ specific ignores
 .godot/
+.claude/settings.local.json
+CLAUDE.local.md
 /android/
+.import/
+export/
+build/
+*.tmp
+*.log

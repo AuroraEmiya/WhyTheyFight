@@ -11,9 +11,9 @@ config_version=5
 [application]
 
 config/name="wtf2"
-run/main_scene="res://test_grid.tscn"
+run/main_scene="res://tests/integration/grid/test_grid.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
-config/icon="res://icon.svg"
+config/icon="uid://bhlq8pxwncvh1"
 
 [autoload]
 

@@ -42,13 +42,13 @@ func _ready() -> void:
 
 	# ── 运行测试 ──
 	_test_grid_cell()
-	await _test_initialization()
-	await _test_occupancy()
-	await _test_adjacency()
-	await _test_pathfinding_straight()
-	await _test_pathfinding_obstacle()
-	await _test_pathfinding_unreachable()
-	await _test_pathfinding_edge_cases()
+	_test_initialization()
+	_test_occupancy()
+	_test_adjacency()
+	_test_pathfinding_straight()
+	_test_pathfinding_obstacle()
+	_test_pathfinding_unreachable()
+	_test_pathfinding_edge_cases()
 
 	_print_summary()
 
